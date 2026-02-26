@@ -6,9 +6,32 @@ With Mac OS X Lion, Apple introduced the concept of "natural scrolling", in whic
 
 **DynamicScrollDirection** essentially hacks around this limitation. It listens for mouse connection/disconnection events and sets the scroll direction appropriately -- traditional scrolling when a mouse is attached and natural scrolling when it is removed.
 
+## Build
+
+Compile with `clang` (no full Xcode install required — just Command Line Tools):
+
+```bash
+clang -framework Foundation -framework IOKit -framework CoreGraphics \
+  -o ~/bin/DynamicScrollDirection DynamicScrollDirection/main.m
+```
+
 ## Installation
 
-Nothing fancy -- put the compiled binary somewhere sensible (e.g., `/usr/local/bin/DynamicScrollDirection`) and install the launchd plist file: `launchctl load com.snosrap.DynamicScrollDirection.plist`.
+1. Copy the launchd plist to `~/Library/LaunchAgents/`:
+
+   ```bash
+   cp com.snosrap.DynamicScrollDirection.plist ~/Library/LaunchAgents/
+   ```
+
+2. Update the `Program` path in the plist to match where you placed the binary (default is `~/bin/DynamicScrollDirection` — note that launchd requires the full expanded path, e.g. `/Users/yourname/bin/DynamicScrollDirection`).
+
+3. Load the launch agent:
+
+   ```bash
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
+   ```
+
+   To unload later: `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist`
 
 ## Alternatives
 

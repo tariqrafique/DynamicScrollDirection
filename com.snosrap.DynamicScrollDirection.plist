@@ -7,6 +7,6 @@
 	<key>RunAtLoad</key>
 	<true/>
 	<key>Program</key>
-	<string>/usr/local/bin/DynamicScrollDirection</string>
+	<string>/Users/mrafique/bin/DynamicScrollDirection</string>
 </dict>
 </plist>
