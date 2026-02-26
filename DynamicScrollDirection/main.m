@@ -47,19 +47,70 @@ void DeviceRemovalCallback(void *context, IOReturn result, void *sender, IOHIDDe
 
 #pragma mark - Litra Light (Camera Monitoring)
 
-static NSString *const kLitraPath = @"/opt/homebrew/bin/litra";
+static const uint16_t kLitraVendorID = 0x046d;
+static const uint16_t kLitraUsagePage = 0xff43;
 static NSMutableSet *activeCameras;
 
 void SetLitraLight(BOOL on) {
     NSLog(@"Litra light %@", on ? @"ON" : @"OFF");
-    NSTask *task = [[NSTask alloc] init];
-    task.executableURL = [NSURL fileURLWithPath:kLitraPath];
-    task.arguments = @[on ? @"on" : @"off"];
-    NSError *error = nil;
-    [task launchAndReturnError:&error];
-    if (error) {
-        NSLog(@"Failed to run litra: %@", error);
+
+    IOHIDManagerRef litraManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDManagerOptionNone);
+    IOHIDManagerSetDeviceMatching(litraManager, (CFDictionaryRef)@{
+        @(kIOHIDVendorIDKey): @(kLitraVendorID),
+        @(kIOHIDDeviceUsagePageKey): @(kLitraUsagePage),
+    });
+    IOHIDManagerOpen(litraManager, kIOHIDOptionsTypeNone);
+
+    CFSetRef deviceSet = IOHIDManagerCopyDevices(litraManager);
+    if (!deviceSet || CFSetGetCount(deviceSet) == 0) {
+        NSLog(@"No Litra device found");
+        if (deviceSet) CFRelease(deviceSet);
+        IOHIDManagerClose(litraManager, kIOHIDOptionsTypeNone);
+        CFRelease(litraManager);
+        return;
     }
+
+    CFIndex count = CFSetGetCount(deviceSet);
+    IOHIDDeviceRef *devices = (IOHIDDeviceRef *)malloc(sizeof(IOHIDDeviceRef) * count);
+    CFSetGetValues(deviceSet, (const void **)devices);
+
+    for (CFIndex i = 0; i < count; i++) {
+        IOHIDDeviceRef device = devices[i];
+
+        int32_t productID = 0;
+        CFNumberRef productIDRef = IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductIDKey));
+        if (productIDRef) CFNumberGetValue(productIDRef, kCFNumberSInt32Type, &productID);
+
+        uint8_t prefix = (productID == 0xc903) ? 0x06 : 0x04;
+        uint8_t onByte = on ? 0x01 : 0x00;
+
+        uint8_t report[20] = {
+            0x11, 0xff, prefix, 0x1c, onByte,
+            0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00,
+        };
+
+        IOReturn openResult = IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone);
+        if (openResult != kIOReturnSuccess) {
+            NSLog(@"Failed to open Litra device: 0x%08x", openResult);
+            continue;
+        }
+
+        IOReturn result = IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, report[0], report, sizeof(report));
+        if (result == kIOReturnSuccess) {
+            NSLog(@"Sent %s command to Litra (product 0x%04x)", on ? "ON" : "OFF", productID);
+        } else {
+            NSLog(@"Failed to send command to Litra: 0x%08x", result);
+        }
+
+        IOHIDDeviceClose(device, kIOHIDOptionsTypeNone);
+    }
+
+    free(devices);
+    CFRelease(deviceSet);
+    IOHIDManagerClose(litraManager, kIOHIDOptionsTypeNone);
+    CFRelease(litraManager);
 }
 
 void CameraStateChanged(CMIOObjectID device) {
