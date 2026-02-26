@@ -23,7 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		824AA7271F9E85BB00620642 /* DynamicScrollDirection */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DynamicScrollDirection; sourceTree = BUILT_PRODUCTS_DIR; };
+		824AA7271F9E85BB00620642 /* Periphery */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Periphery; sourceTree = BUILT_PRODUCTS_DIR; };
 		824AA72A1F9E85BB00620642 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -41,7 +41,7 @@
 		824AA71E1F9E85BB00620642 = {
 			isa = PBXGroup;
 			children = (
-				824AA7291F9E85BB00620642 /* DynamicScrollDirection */,
+				824AA7291F9E85BB00620642 /* Periphery */,
 				824AA7281F9E85BB00620642 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -49,25 +49,25 @@
 		824AA7281F9E85BB00620642 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				824AA7271F9E85BB00620642 /* DynamicScrollDirection */,
+				824AA7271F9E85BB00620642 /* Periphery */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		824AA7291F9E85BB00620642 /* DynamicScrollDirection */ = {
+		824AA7291F9E85BB00620642 /* Periphery */ = {
 			isa = PBXGroup;
 			children = (
 				824AA72A1F9E85BB00620642 /* main.m */,
 			);
-			path = DynamicScrollDirection;
+			path = Periphery;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		824AA7261F9E85BB00620642 /* DynamicScrollDirection */ = {
+		824AA7261F9E85BB00620642 /* Periphery */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 824AA72E1F9E85BB00620642 /* Build configuration list for PBXNativeTarget "DynamicScrollDirection" */;
+			buildConfigurationList = 824AA72E1F9E85BB00620642 /* Build configuration list for PBXNativeTarget "Periphery" */;
 			buildPhases = (
 				824AA7231F9E85BB00620642 /* Sources */,
 				824AA7241F9E85BB00620642 /* Frameworks */,
@@ -77,9 +77,9 @@
 			);
 			dependencies = (
 			);
-			name = DynamicScrollDirection;
-			productName = DynamicScrollDirection;
-			productReference = 824AA7271F9E85BB00620642 /* DynamicScrollDirection */;
+			name = Periphery;
+			productName = Periphery;
+			productReference = 824AA7271F9E85BB00620642 /* Periphery */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -97,7 +97,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 824AA7221F9E85BB00620642 /* Build configuration list for PBXProject "DynamicScrollDirection" */;
+			buildConfigurationList = 824AA7221F9E85BB00620642 /* Build configuration list for PBXProject "Periphery" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -109,7 +109,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				824AA7261F9E85BB00620642 /* DynamicScrollDirection */,
+				824AA7261F9E85BB00620642 /* Periphery */,
 			);
 		};
 /* End PBXProject section */
@@ -248,7 +248,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		824AA7221F9E85BB00620642 /* Build configuration list for PBXProject "DynamicScrollDirection" */ = {
+		824AA7221F9E85BB00620642 /* Build configuration list for PBXProject "Periphery" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				824AA72C1F9E85BB00620642 /* Debug */,
@@ -257,7 +257,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		824AA72E1F9E85BB00620642 /* Build configuration list for PBXNativeTarget "DynamicScrollDirection" */ = {
+		824AA72E1F9E85BB00620642 /* Build configuration list for PBXNativeTarget "Periphery" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				824AA72F1F9E85BB00620642 /* Debug */,

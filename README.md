@@ -1,4 +1,4 @@
-# DynamicScrollDirection
+# Periphery
 
 A lightweight macOS utility that runs as a launch agent and does two things:
 
@@ -26,7 +26,7 @@ Or compile directly with `clang` (only Command Line Tools required):
 
 ```bash
 clang -framework Foundation -framework IOKit -framework CoreGraphics -framework CoreMediaIO \
-  -o ~/bin/DynamicScrollDirection DynamicScrollDirection/main.m
+  -o ~/bin/Periphery Periphery/main.m
 ```
 
 ## Installation
@@ -34,18 +34,18 @@ clang -framework Foundation -framework IOKit -framework CoreGraphics -framework 
 1. Copy the launchd plist to `~/Library/LaunchAgents/`:
 
    ```bash
-   cp com.snosrap.DynamicScrollDirection.plist ~/Library/LaunchAgents/
+   cp com.tariqrafique.Periphery.plist ~/Library/LaunchAgents/
    ```
 
-2. Update the `Program` path in the plist to match where you placed the binary (default is `~/bin/DynamicScrollDirection` — launchd requires the full expanded path, e.g. `/Users/yourname/bin/DynamicScrollDirection`).
+2. Update the `Program` path in the plist to match where you placed the binary (default is `~/bin/Periphery` — launchd requires the full expanded path, e.g. `/Users/yourname/bin/Periphery`).
 
 3. Load the launch agent:
 
    ```bash
-   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
+   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.tariqrafique.Periphery.plist
    ```
 
-   To unload later: `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist`
+   To unload later: `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.tariqrafique.Periphery.plist`
 
 ## Alternatives
 

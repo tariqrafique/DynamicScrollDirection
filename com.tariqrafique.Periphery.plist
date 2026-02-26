@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.snosrap.DynamicScrollDirection</string>
+	<string>com.tariqrafique.Periphery</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>Program</key>
-	<string>/Users/mrafique/bin/DynamicScrollDirection</string>
+	<string>/Users/mrafique/bin/Periphery</string>
 </dict>
 </plist>

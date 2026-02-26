@@ -1,6 +1,6 @@
 //
 //  main.m
-//  DynamicScrollDirection
+//  Periphery
 //
 //  Created by Ford Parsons on 10/23/17.
 //  Copyright © 2017 Ford Parsons. All rights reserved.

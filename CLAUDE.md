@@ -6,7 +6,7 @@ macOS command-line utility (Objective-C) that runs as a launch agent. Two featur
 1. **Scroll direction** — switches to traditional scrolling when a USB mouse is attached, natural scrolling when removed
 2. **Litra light** — toggles Logitech Litra light on/off when any camera is activated/deactivated
 
-Single source file: `DynamicScrollDirection/main.m`
+Single source file: `Periphery/main.m`
 
 ## Build
 
@@ -14,20 +14,20 @@ Single source file: `DynamicScrollDirection/main.m`
 xcodebuild -configuration Release
 ```
 
-Binary output: `build/Release/DynamicScrollDirection`
+Binary output: `build/Release/Periphery`
 
 Alternatively, build with clang directly (add `-framework CoreMediaIO` for camera monitoring):
 ```bash
 clang -framework Foundation -framework IOKit -framework CoreGraphics -framework CoreMediaIO \
-  -o ~/bin/DynamicScrollDirection DynamicScrollDirection/main.m
+  -o ~/bin/Periphery Periphery/main.m
 ```
 
 ## Deploy
 
 ```bash
-cp build/Release/DynamicScrollDirection ~/bin/DynamicScrollDirection
-launchctl unload ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
-launchctl load ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
+cp build/Release/Periphery ~/bin/Periphery
+launchctl unload ~/Library/LaunchAgents/com.tariqrafique.Periphery.plist
+launchctl load ~/Library/LaunchAgents/com.tariqrafique.Periphery.plist
 ```
 
 ## Key technical details
@@ -41,5 +41,5 @@ launchctl load ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
 ## Debugging
 
 ```bash
-/usr/bin/log show --predicate 'process == "DynamicScrollDirection"' --last 5m | grep -E "Camera state|Litra|Monitoring|Attached|Removed"
+/usr/bin/log show --predicate 'process == "Periphery"' --last 5m | grep -E "Camera state|Litra|Monitoring|Attached|Removed"
 ```
