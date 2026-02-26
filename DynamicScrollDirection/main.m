@@ -50,6 +50,8 @@ void DeviceRemovalCallback(void *context, IOReturn result, void *sender, IOHIDDe
 static const uint16_t kLitraVendorID = 0x046d;
 static const uint16_t kLitraUsagePage = 0xff43;
 static NSMutableSet *activeCameras;
+static CMIODeviceID *monitoredCameras;
+static UInt32 monitoredCameraCount;
 
 void SetLitraLight(BOOL on) {
     NSLog(@"Litra light %@", on ? @"ON" : @"OFF");
@@ -113,25 +115,27 @@ void SetLitraLight(BOOL on) {
     CFRelease(litraManager);
 }
 
-void CameraStateChanged(CMIOObjectID device) {
+void CameraStateChanged(CMIOObjectID triggerDevice) {
     CMIOObjectPropertyAddress isRunningAddress = {
         kCMIODevicePropertyDeviceIsRunningSomewhere,
         kCMIOObjectPropertyScopeWildcard,
         kCMIOObjectPropertyElementWildcard
     };
 
-    UInt32 isRunning = 0;
-    UInt32 dataSize = sizeof(isRunning);
-    OSStatus status = CMIOObjectGetPropertyData(device, &isRunningAddress, 0, NULL, sizeof(isRunning), &dataSize, &isRunning);
-    if (status != kCMIOHardwareNoError) return;
-
-    if (isRunning) {
-        [activeCameras addObject:@(device)];
-    } else {
-        [activeCameras removeObject:@(device)];
+    // Poll all monitored cameras to get the full picture, since not all
+    // cameras reliably fire property change callbacks (e.g. when a camera
+    // app pre-opens multiple cameras at launch).
+    [activeCameras removeAllObjects];
+    for (UInt32 i = 0; i < monitoredCameraCount; i++) {
+        UInt32 isRunning = 0;
+        UInt32 dataSize = sizeof(isRunning);
+        OSStatus status = CMIOObjectGetPropertyData(monitoredCameras[i], &isRunningAddress, 0, NULL, sizeof(isRunning), &dataSize, &isRunning);
+        if (status == kCMIOHardwareNoError && isRunning) {
+            [activeCameras addObject:@(monitoredCameras[i])];
+        }
     }
 
-    NSLog(@"Camera device %u %s (%lu active)", device, isRunning ? "started" : "stopped", (unsigned long)activeCameras.count);
+    NSLog(@"Camera state changed (trigger device %u), %lu active", triggerDevice, (unsigned long)activeCameras.count);
     SetLitraLight(activeCameras.count > 0);
 }
 
@@ -163,10 +167,16 @@ void SetupCameraMonitoring(void) {
         kCMIOObjectPropertyElementWildcard
     };
 
+    // Build filtered list of cameras that support isRunningSomewhere
+    monitoredCameras = (CMIODeviceID *)malloc(dataSize);
+    monitoredCameraCount = 0;
+
     for (UInt32 i = 0; i < deviceCount; i++) {
         CMIODeviceID device = devices[i];
 
         if (!CMIOObjectHasProperty(device, &isRunningAddress)) continue;
+
+        monitoredCameras[monitoredCameraCount++] = device;
 
         // Get device name for logging
         CMIOObjectPropertyAddress nameAddress = {
