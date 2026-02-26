@@ -34,5 +34,12 @@ launchctl load ~/Library/LaunchAgents/com.snosrap.DynamicScrollDirection.plist
 
 - **Frameworks**: IOKit HID (mouse monitoring + Litra control), CoreMediaIO (camera monitoring), CoreGraphics (scroll direction)
 - **Litra HID protocol**: Vendor `0x046d`, usage page `0xff43`. On/off via 20-byte output report `[0x11, 0xff, prefix, 0x1c, 0x01/0x00, ...]` where prefix is `0x04` (Glow/Beam) or `0x06` (Beam LX). Protocol derived from [litra-rs](https://github.com/timrogers/litra-rs).
+- **Camera monitoring**: Uses `kCMIODevicePropertyDeviceIsRunningSomewhere` property listeners. On any camera state change, all monitored cameras are polled — some camera apps pre-open multiple cameras at launch, so individual callbacks can't be relied on alone.
 - **CLANG_ENABLE_MODULES=YES** in the Xcode project, so `#import` auto-links frameworks without manual pbxproj edits
 - `CGSSetSwipeScrollDirection` is an undocumented CoreGraphics API
+
+## Debugging
+
+```bash
+/usr/bin/log show --predicate 'process == "DynamicScrollDirection"' --last 5m | grep -E "Camera state|Litra|Monitoring|Attached|Removed"
+```
