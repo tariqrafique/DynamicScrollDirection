@@ -52,6 +52,7 @@ static const uint16_t kLitraUsagePage = 0xff43;
 static NSMutableSet *activeCameras;
 static CMIODeviceID *monitoredCameras;
 static UInt32 monitoredCameraCount;
+static __strong CMIOObjectPropertyListenerBlock *cameraStateBlocks;
 
 void SetLitraLight(BOOL on) {
     NSLog(@"Litra light %@", on ? @"ON" : @"OFF");
@@ -139,8 +140,26 @@ void CameraStateChanged(CMIOObjectID triggerDevice) {
     SetLitraLight(activeCameras.count > 0);
 }
 
-void SetupCameraMonitoring(void) {
-    activeCameras = [NSMutableSet set];
+void RefreshCameraMonitoring(void) {
+    NSLog(@"Refreshing camera monitoring");
+
+    CMIOObjectPropertyAddress isRunningAddress = {
+        kCMIODevicePropertyDeviceIsRunningSomewhere,
+        kCMIOObjectPropertyScopeWildcard,
+        kCMIOObjectPropertyElementWildcard
+    };
+
+    // Remove existing per-camera listeners
+    for (UInt32 i = 0; i < monitoredCameraCount; i++) {
+        CMIOObjectRemovePropertyListenerBlock(monitoredCameras[i], &isRunningAddress, dispatch_get_main_queue(), cameraStateBlocks[i]);
+        cameraStateBlocks[i] = nil;
+    }
+    free(monitoredCameras);
+    free(cameraStateBlocks);
+    monitoredCameras = NULL;
+    cameraStateBlocks = NULL;
+    monitoredCameraCount = 0;
+    [activeCameras removeAllObjects];
 
     // Get all CoreMediaIO devices
     CMIOObjectPropertyAddress devicesAddress = {
@@ -161,22 +180,14 @@ void SetupCameraMonitoring(void) {
     CMIODeviceID *devices = (CMIODeviceID *)malloc(dataSize);
     CMIOObjectGetPropertyData(kCMIOObjectSystemObject, &devicesAddress, 0, NULL, dataSize, &dataSize, devices);
 
-    CMIOObjectPropertyAddress isRunningAddress = {
-        kCMIODevicePropertyDeviceIsRunningSomewhere,
-        kCMIOObjectPropertyScopeWildcard,
-        kCMIOObjectPropertyElementWildcard
-    };
-
     // Build filtered list of cameras that support isRunningSomewhere
     monitoredCameras = (CMIODeviceID *)malloc(dataSize);
-    monitoredCameraCount = 0;
+    cameraStateBlocks = (__strong CMIOObjectPropertyListenerBlock *)calloc(deviceCount, sizeof(CMIOObjectPropertyListenerBlock));
 
     for (UInt32 i = 0; i < deviceCount; i++) {
         CMIODeviceID device = devices[i];
 
         if (!CMIOObjectHasProperty(device, &isRunningAddress)) continue;
-
-        monitoredCameras[monitoredCameraCount++] = device;
 
         // Get device name for logging
         CMIOObjectPropertyAddress nameAddress = {
@@ -190,12 +201,39 @@ void SetupCameraMonitoring(void) {
         NSLog(@"Monitoring camera: %@ (id %u)", deviceName, device);
         if (deviceName) CFRelease(deviceName);
 
-        CMIOObjectAddPropertyListenerBlock(device, &isRunningAddress, dispatch_get_main_queue(), ^(UInt32 numberAddresses, const CMIOObjectPropertyAddress addresses[]) {
+        CMIOObjectPropertyListenerBlock block = ^(UInt32 numberAddresses, const CMIOObjectPropertyAddress addresses[]) {
             CameraStateChanged(device);
-        });
+        };
+        CMIOObjectAddPropertyListenerBlock(device, &isRunningAddress, dispatch_get_main_queue(), block);
+
+        monitoredCameras[monitoredCameraCount] = device;
+        cameraStateBlocks[monitoredCameraCount] = block;
+        monitoredCameraCount++;
     }
 
     free(devices);
+
+    // Poll current state — a camera may already be active after reconnection
+    if (monitoredCameraCount > 0) {
+        CameraStateChanged(0);
+    }
+}
+
+void SetupCameraMonitoring(void) {
+    activeCameras = [NSMutableSet set];
+
+    // Register system-level listener for device list changes (camera add/remove)
+    CMIOObjectPropertyAddress devicesAddress = {
+        kCMIOHardwarePropertyDevices,
+        kCMIOObjectPropertyScopeGlobal,
+        0
+    };
+    CMIOObjectAddPropertyListenerBlock(kCMIOObjectSystemObject, &devicesAddress, dispatch_get_main_queue(), ^(UInt32 numberAddresses, const CMIOObjectPropertyAddress addresses[]) {
+        RefreshCameraMonitoring();
+    });
+
+    // Initial enumeration
+    RefreshCameraMonitoring();
 }
 
 #pragma mark - Main
